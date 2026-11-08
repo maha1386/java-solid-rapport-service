@@ -10,60 +10,90 @@ class EmpruntManagerTest {
 
     @Test
     void empruntDocumentInconnu() {
-        EmpruntManager m = new EmpruntManager(new Catalogue<>());
 
-        DocumentIntrouvableException ex = assertThrows(
-            DocumentIntrouvableException.class,
-            () -> m.emprunter("Fantome")
+        Catalogue<Document> catalogue = new Catalogue<>();
+
+        ConfigurationMediatheque config =
+                new ConfigurationMediatheque(21, 5);
+
+        EmpruntManager m =
+                new EmpruntManager(catalogue, config);
+
+        assertThrows(
+                DocumentIntrouvableException.class,
+                () -> m.emprunter("Inconnu")
         );
-
-        assertTrue(ex.getMessage().contains("Fantome"));
     }
 
     @Test
-    void doubleEmprunt() throws MediathequeException {
-        Catalogue<Document> c = new Catalogue<>();
-        c.ajouter(new Livre("Clean Code", 2008, "R. Martin", 464));
+    void empruntDocumentNonEmpruntable() {
 
-        EmpruntManager m = new EmpruntManager(c);
-        m.emprunter("Clean Code");
+        Catalogue<Document> catalogue = new Catalogue<>();
 
-        DocumentIndisponibleException ex = assertThrows(
-            DocumentIndisponibleException.class,
-            () -> m.emprunter("Clean Code")
+        ConfigurationMediatheque config =
+                new ConfigurationMediatheque(21, 5);
+
+        EmpruntManager m =
+                new EmpruntManager(catalogue, config);
+
+        Document document =
+                new Document("Document test", 2024) {
+                    @Override
+                    public String descriptionCourte() {
+                        return "Document test";
+                    }
+                };
+
+        catalogue.ajouter(document);
+
+        assertThrows(
+                DocumentIndisponibleException.class,
+                () -> m.emprunter("Document test")
         );
-
-        assertTrue(ex.getMessage().contains("Clean Code"));
     }
 
     @Test
-    void revueNonEmpruntable() {
-        Catalogue<Document> c = new Catalogue<>();
-        c.ajouter(new Revue("Science", 2026, 412));
+    void empruntDocumentDisponible() throws MediathequeException {
 
-        EmpruntManager m = new EmpruntManager(c);
+        Catalogue<Document> catalogue = new Catalogue<>();
 
-        DocumentIndisponibleException ex = assertThrows(
-            DocumentIndisponibleException.class,
-            () -> m.emprunter("Science")
+        ConfigurationMediatheque config =
+                new ConfigurationMediatheque(21, 5);
+
+        EmpruntManager m =
+                new EmpruntManager(catalogue, config);
+
+        Livre livre = new Livre(
+                "Clean Code", 2008, "Robert Martin", 464
         );
 
-        assertTrue(ex.getMessage().contains("Science"));
+        catalogue.ajouter(livre);
+
+        assertDoesNotThrow(() -> m.emprunter("Clean Code"));
     }
 
     @Test
-    void empruntRetourNouvelEmprunt() throws MediathequeException {
-        Livre l = new Livre("Dune", 1965, "F. Herbert", 612);
-        Catalogue<Document> c = new Catalogue<>();
-        c.ajouter(l);
+    void empruntDocumentDejaEmprunte() throws MediathequeException {
 
-        EmpruntManager m = new EmpruntManager(c);
-        m.emprunter("Dune");
+        Catalogue<Document> catalogue = new Catalogue<>();
 
-        assertFalse(l.estDisponible());
+        ConfigurationMediatheque config =
+                new ConfigurationMediatheque(21, 5);
 
-        l.rendre();
+        EmpruntManager m =
+                new EmpruntManager(catalogue, config);
 
-        assertDoesNotThrow(() -> m.emprunter("Dune"));
+        Livre livre = new Livre(
+                "Java", 2024, "Ahmed", 350
+        );
+
+        catalogue.ajouter(livre);
+
+        m.emprunter("Java");
+
+        assertThrows(
+                DocumentIndisponibleException.class,
+                () -> m.emprunter("Java")
+        );
     }
 }

@@ -6,9 +6,14 @@ import com.example.Exceptions.DocumentIndisponibleException;
 public class EmpruntManager {
 
     private final Catalogue<Document> catalogue;
+    private final ConfigurationMediatheque configuration;
 
-    public EmpruntManager(Catalogue<Document> catalogue) {
+    public EmpruntManager(
+            Catalogue<Document> catalogue,
+            ConfigurationMediatheque configuration) {
+
         this.catalogue = catalogue;
+        this.configuration = configuration;
     }
 
     public void emprunter(String titre) throws MediathequeException {

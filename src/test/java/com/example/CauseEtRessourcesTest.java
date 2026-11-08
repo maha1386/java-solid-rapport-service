@@ -25,8 +25,12 @@ class CauseEtRessourcesTest {
     @Test
     void rapportFermeSiEmpruntEchoue() {
         RapportEmprunt rapport = new RapportEmprunt();
+
+        ConfigurationMediatheque config =
+                new ConfigurationMediatheque(21, 5);
+
         EmpruntManager manager =
-            new EmpruntManager(new Catalogue<>());
+                new EmpruntManager(new Catalogue<>(), config);
 
         assertThrows(MediathequeException.class, () -> {
             try (rapport) {
